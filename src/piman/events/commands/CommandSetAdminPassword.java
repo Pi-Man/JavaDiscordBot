@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.entities.Message;
 import piman.TestBot;
 import piman.events.PasswordListener;
 import piman.exceptions.IncorrectPasswordException;
+import piman.exceptions.InvalidAccessException;
 import piman.exceptions.NoPasswordException;
 import piman.exceptions.SyntaxErrorException;
 
@@ -35,7 +36,7 @@ public class CommandSetAdminPassword extends CommandPasswordAdmin {
 	}
 	
 	
-	protected void requestPassword(Message message) throws IncorrectPasswordException, NoPasswordException {
+	protected void requestPassword(Message message) throws InvalidAccessException, NoPasswordException {
 		
 		message.delete().queue();
 		
@@ -71,13 +72,13 @@ public class CommandSetAdminPassword extends CommandPasswordAdmin {
 		message.getJDA().removeEventListener(passwordlistener);
 			
 		if (!passwordlistener.getPassword().equals(password)) {
-			throw new IncorrectPasswordException(passwordlistener.getPassword());
+			throw new IncorrectPasswordException();
 		}
 		
 	}
 	
 	@Override
-	public void requestPassword(Message message, String input) throws IncorrectPasswordException, NoPasswordException {
+	public void requestPassword(Message message, String input) throws InvalidAccessException, NoPasswordException {
 		requestPassword(message);
 	}
 

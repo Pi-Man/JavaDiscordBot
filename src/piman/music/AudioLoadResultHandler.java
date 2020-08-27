@@ -45,9 +45,11 @@ public class AudioLoadResultHandler implements com.sedmelluq.discord.lavaplayer.
 		if (this.trackName.startsWith(YTSEARCH)) {
 			channel.sendMessage("Track Not Found: " + trackName).queue();
 		}
-		this.trackName = YTSEARCH + trackName;
-		System.out.println("serching youtube for: " + trackName);
-		TestBot.playerManager.loadItem(trackName, this);
+		else {
+			this.trackName = YTSEARCH + trackName;
+			System.out.println("serching youtube for: " + trackName);
+			TestBot.playerManager.loadItem(trackName, this);
+		}
 	}
 	
 	@Override

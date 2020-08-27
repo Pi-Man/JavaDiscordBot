@@ -10,6 +10,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BaseAudioTrack;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -32,7 +33,9 @@ public class MusicPlayerUpdater implements EventListener{
 		FORW = "\u23e9",
 		NEXT = "\u23ed",
 		SHFL = "\ud83d\udd00",
-		REPT = "\ud83d\udd01";
+		REPT = "\ud83d\udd01",
+		RPT1 = "\uD83D\uDD02",
+		RSET = "\uD83D\uDD04";
 		
 	private Map<String, PlayList> playlists = new HashMap<>();
 	
@@ -139,6 +142,14 @@ public class MusicPlayerUpdater implements EventListener{
 					
 				}
 				
+				if (reaction.equals(RPT1)) {
+					TestBot.getAudioEventHandler(reactionEvent.getGuild().getId()).shuffleQueue();
+				}
+				
+				if (reaction.equals(RSET)) {
+					TestBot.getAudioEventHandler(reactionEvent.getGuild().getId()).reset();
+				}
+				
 				channel.removeReactionById(reactionEvent.getMessageId(), reaction, reactionEvent.getUser()).queue();
 				
 			}
@@ -216,19 +227,19 @@ public class MusicPlayerUpdater implements EventListener{
 			
 				AudioTrack track = TestBot.getAudioPlayer(guildID).getPlayingTrack();
 							
-				getChannel(guildID).sendMessage(getMessageString(track, guildID)).queue( (message) -> {
+				Message message = getChannel(guildID).sendMessage(getMessageString(track, guildID)).complete();
 					
-					setMessage(message.getId(), guildID); 
-					
-					message.addReaction(PREV).queue();
-					message.addReaction(BACK).queue();
-					message.addReaction(PLAY).queue();
-					message.addReaction(FORW).queue();
-					message.addReaction(NEXT).queue();
-					message.addReaction(SHFL).queue();
-					message.addReaction(REPT).queue();
-					
-				});
+				setMessage(message.getId(), guildID); 
+				
+				message.addReaction(PREV).queue();
+				message.addReaction(BACK).queue();
+				message.addReaction(PLAY).queue();
+				message.addReaction(FORW).queue();
+				message.addReaction(NEXT).queue();
+				message.addReaction(SHFL).queue();
+				message.addReaction(REPT).queue();
+				message.addReaction(RPT1).queue();
+				message.addReaction(RSET).queue();
 			
 			}
 			
@@ -450,7 +461,11 @@ public class MusicPlayerUpdater implements EventListener{
 	}
 	
 	public boolean hasMessage(String guildID) {
-		return TestBot.getConfig(guildID).hasSetting("playbarMessage", String.class);
+		boolean flag = TestBot.getConfig(guildID).hasSetting("playbarMessage", String.class) && !TestBot.getConfig(guildID).getSetting("playbarMessage",  String.class).isEmpty();
+		if (flag && hasChannel(guildID)) {
+			flag &= getChannel(guildID).retrieveMessageById(getMessage(guildID)).complete() != null;
+		}
+		return flag;
 	}
 	
 	public boolean removeMessage(String guildID) {

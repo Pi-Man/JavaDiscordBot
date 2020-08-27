@@ -3,6 +3,7 @@ package piman.events.commands;
 import net.dv8tion.jda.api.entities.Message;
 import piman.events.PasswordListener;
 import piman.exceptions.IncorrectPasswordException;
+import piman.exceptions.InvalidAccessException;
 import piman.exceptions.NoPasswordException;
 
 public abstract class CommandPasswordBase extends CommandBase {
@@ -11,7 +12,7 @@ public abstract class CommandPasswordBase extends CommandBase {
 		super(identifier, visibility);
 	}
 	
-	public void requestPassword(Message message, String input) throws IncorrectPasswordException, NoPasswordException {
+	public void requestPassword(Message message, String input) throws InvalidAccessException, NoPasswordException {
 		
 		String password = this.getPassword(message, input);
 		
@@ -36,13 +37,13 @@ public abstract class CommandPasswordBase extends CommandBase {
 		}
 		
 		if (!passwordlistener.getPassword().equals(this.getPassword(message, input))) {
-			throw new IncorrectPasswordException(passwordlistener.getPassword());
+			throw new IncorrectPasswordException();
 		}
 		
 		message1.delete().queue();
 		
 	}
 	
-	protected abstract String getPassword(Message message, String input) throws NoPasswordException;
+	protected abstract String getPassword(Message message, String input) throws NoPasswordException, InvalidAccessException;
 
 }

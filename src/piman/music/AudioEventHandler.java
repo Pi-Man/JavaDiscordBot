@@ -70,7 +70,7 @@ public class AudioEventHandler implements AudioEventListener {
 	public void playNext(AudioTrack oldtrack) {
 		
 		if (oldtrack == null) {
-			if (TestBot.getConfig(guildID).getSetting("repeat", Boolean.class)) {
+			if (!playedqueue.isEmpty() && TestBot.getConfig(guildID).getSetting("repeat", Boolean.class)) {
 				this.repeat();
 				if (TestBot.getConfig(guildID).getSetting("shuffle", Boolean.class)) {
 					this.shuffle();
@@ -141,6 +141,22 @@ public class AudioEventHandler implements AudioEventListener {
 		for (AudioTrack track : queue) {
 			System.out.println(track.getInfo().title);
 		}
+	}
+	
+	public void reset() {
+		AudioTrack track = audioPlayer.getPlayingTrack();
+		if (track != null) {
+			queue.add(0, track.makeClone());
+		}
+		repeat();
+		if (TestBot.getConfig(guildID).getSetting("shuffle", Boolean.class)) {
+			shuffle();
+		}
+		playNext(null);
+	}
+	
+	public void shuffleQueue() {
+		shuffle();
 	}
 	
 }

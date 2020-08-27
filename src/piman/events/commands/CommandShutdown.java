@@ -17,9 +17,7 @@ public class CommandShutdown extends CommandPasswordAdmin {
 
 	@Override
 	public void run(Message message, String input) throws SyntaxErrorException {
-		
 		TestBot.shutdown(message.getJDA());
-		
 	}
 
 }

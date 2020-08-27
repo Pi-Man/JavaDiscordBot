@@ -1,9 +1,9 @@
 package piman.exceptions;
 
-public class IncorrectPasswordException extends Exception {
+public class IncorrectPasswordException extends InvalidAccessException {
 
-	public IncorrectPasswordException(String message) {
-		super(message);
+	public IncorrectPasswordException() {
+		super("Invalid Password");
 	}
 	
 }

@@ -27,7 +27,7 @@ public class CommandSetChannel extends CommandBase {
 		} 
 		else if (channels.isEmpty() && args.length == 1) {
 			if (args[0].toLowerCase().equals("none")) {
-				this.setChannel(message, "none");
+				this.setChannel(message, "");
 			} 
 			else {
 				throw new SyntaxErrorException("");
@@ -54,8 +54,8 @@ public class CommandSetChannel extends CommandBase {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (channel.equals("none")) {
-			message.getChannel().sendMessage("Reset Channel to \"none\"").queue();
+		if (channel.isEmpty()) {
+			message.getChannel().sendMessage("Reset Channel").queue();
 		} 
 		else {
 			message.getJDA().getTextChannelById(channel).sendMessage("Set Channel to: " + message.getJDA().getTextChannelById(channel).getAsMention()).queue();

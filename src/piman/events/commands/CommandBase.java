@@ -40,7 +40,7 @@ public abstract class CommandBase {
 		if (this.visibility == Visibility.ALL) {
 			flag = true;
 		} 
-		else if (this.visibility == Visibility.NONE && TestBot.getConfig(channel.getGuild().getId()).getSetting("channel", String.class).equals("none")) {
+		else if (this.visibility == Visibility.NONE && TestBot.getConfig(channel.getGuild().getId()).getSetting("channel", String.class).isEmpty()) {
 			flag = true;
 		} 
 		else if ((this.visibility == Visibility.CHANNEL || this.visibility == Visibility.NONE) && TestBot.getConfig(channel.getGuild().getId()).getSetting("channel", String.class).equals(channel.getId())) {

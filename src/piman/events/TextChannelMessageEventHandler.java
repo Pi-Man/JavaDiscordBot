@@ -26,7 +26,7 @@ import piman.events.commands.CommandBase.Visibility;
 import piman.events.commands.CommandClearHistory;
 import piman.events.commands.CommandClearQueue;
 import piman.events.commands.CommandCreatePlayBar;
-import piman.exceptions.IncorrectPasswordException;
+import piman.exceptions.InvalidAccessException;
 import piman.exceptions.NoPasswordException;
 import piman.exceptions.SyntaxErrorException;
 
@@ -93,8 +93,8 @@ public class TextChannelMessageEventHandler implements EventListener {
 									catch (SyntaxErrorException e) {
 										message.getChannel().sendMessage("Syntax Error, Correct Usage: `" + command.getUsage() + "`").queue();
 									}
-									catch (IncorrectPasswordException e) {
-										message.getChannel().sendMessage("Incorrect Password").queue();
+									catch (InvalidAccessException e) {
+										message.getChannel().sendMessage(e.getMessage()).queue();
 									}
 									catch (NoPasswordException e) {
 										message.getChannel().sendMessage("No Password Set").queue();

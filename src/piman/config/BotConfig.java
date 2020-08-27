@@ -19,12 +19,28 @@ public class BotConfig {
 	public BotConfig(String location) {
 		this.location = location;
 	}
+	
+	private File getFile() throws IOException {
+		
+		File path = new File(PATH);
+		File file = new File(PATH + location);
+		
+		if (!path.isDirectory()) {
+			path.mkdirs();
+		}
+		
+		if (!file.isFile()) {
+			file.createNewFile();
+		}
+		
+		return file;
+	}
 
 	public void read() throws IOException {
 
 		settings.clear();
 		
-		File file = new File(PATH + location);
+		File file = getFile();
 
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 
@@ -54,7 +70,7 @@ public class BotConfig {
 
 	public void write() throws IOException {
 
-		File file = new File(PATH + location);
+		File file = getFile();
 		
 		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
 
