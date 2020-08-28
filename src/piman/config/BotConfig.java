@@ -213,12 +213,17 @@ public class BotConfig {
 
 				SettingsEntry entry = (SettingsEntry) obj;
 
-				return this.getKey() == entry.getKey() && this.getValue() == entry.getValue();
+				return this.key == entry.key && this.value.getClass() == entry.value.getClass();
 
 			}
 
 			return false;
 
+		}
+		
+		@Override
+		public int hashCode() {
+			return this.key.hashCode() << 16 | this.value.getClass().hashCode();
 		}
 
 	}

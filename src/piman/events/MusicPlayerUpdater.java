@@ -32,6 +32,7 @@ public class MusicPlayerUpdater implements EventListener{
 		PLAY = "\u23ef",
 		FORW = "\u23e9",
 		NEXT = "\u23ed",
+		CLER = "\u23F9",
 		SHFL = "\ud83d\udd00",
 		REPT = "\ud83d\udd01",
 		RPT1 = "\uD83D\uDD02",
@@ -102,6 +103,10 @@ public class MusicPlayerUpdater implements EventListener{
 					
 					this.handleNext(reactionEvent);
 					
+				}
+				
+				if (reaction.equals(CLER)) {
+					TestBot.getAudioEventHandler(reactionEvent.getGuild().getId()).removeCurrentSong();
 				}
 				
 				if (reaction.equals(SHFL)) {
@@ -236,6 +241,7 @@ public class MusicPlayerUpdater implements EventListener{
 				message.addReaction(PLAY).queue();
 				message.addReaction(FORW).queue();
 				message.addReaction(NEXT).queue();
+				message.addReaction(CLER).queue();
 				message.addReaction(SHFL).queue();
 				message.addReaction(REPT).queue();
 				message.addReaction(RPT1).queue();

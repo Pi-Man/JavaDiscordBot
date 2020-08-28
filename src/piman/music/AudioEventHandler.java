@@ -159,4 +159,15 @@ public class AudioEventHandler implements AudioEventListener {
 		shuffle();
 	}
 	
+	public void removeCurrentSong() {
+		if (queue.isEmpty()) {
+			audioPlayer.startTrack(null, false);
+			return;
+		}
+		
+		AudioTrack track = queue.remove(0);
+		
+		audioPlayer.startTrack(track, false);
+	}
+	
 }
