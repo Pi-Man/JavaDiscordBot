@@ -17,7 +17,7 @@ public class BotConfig {
 	private Set<SettingsEntry> settings = new HashSet<SettingsEntry>();
 
 	public BotConfig(String location) {
-		this.location = location;
+		this.location = location + ".txt";
 	}
 	
 	private File getFile() throws IOException {

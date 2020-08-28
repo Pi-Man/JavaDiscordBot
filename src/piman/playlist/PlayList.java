@@ -33,7 +33,7 @@ public class PlayList {
 	private String password;
 	
 	public PlayList(String guildID, String name) {
-		this.name = name;
+		this.name = name + ".txt";
 		this.guildID = guildID + "/";
 	}
 	
