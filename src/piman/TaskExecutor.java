@@ -19,6 +19,8 @@ public class TaskExecutor implements Runnable {
 					task.run();
 				}
 				tasks.clear();
+				
+				
 				try {
 					this.wait();
 				} catch (InterruptedException e) {
