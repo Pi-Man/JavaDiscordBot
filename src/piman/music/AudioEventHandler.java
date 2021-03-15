@@ -1,5 +1,6 @@
 package piman.music;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -8,10 +9,17 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventListener;
 import com.sedmelluq.discord.lavaplayer.player.event.TrackEndEvent;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeHttpContextFilter;
+import com.sedmelluq.discord.lavaplayer.tools.JsonBrowser;
+import com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools;
+import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterface;
+import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterfaceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
 import piman.TestBot;
+import piman.youtube.Captions;
+import piman.youtube.YoutubeAudioTrackInfo;
 
 public class AudioEventHandler implements AudioEventListener {
 	
@@ -23,9 +31,13 @@ public class AudioEventHandler implements AudioEventListener {
 	
 	private String guildID;
 	
+	private final HttpInterfaceManager httpInterfaceManager;
+	
 	public AudioEventHandler(AudioPlayer player, String guildID) {
 		this.audioPlayer = player;
 		this.guildID = guildID;
+	    httpInterfaceManager = HttpClientTools.createDefaultThreadLocalManager();
+	    httpInterfaceManager.setHttpContextFilter(new YoutubeHttpContextFilter());
 	}
 	
 	@Override
@@ -88,7 +100,7 @@ public class AudioEventHandler implements AudioEventListener {
 		
 		AudioTrack track = queue.remove(0);
 		
-		audioPlayer.startTrack(track, false);
+		play(track);
 	}
 	
 	public void playPrev(AudioTrack oldTrack) {
@@ -102,11 +114,26 @@ public class AudioEventHandler implements AudioEventListener {
 		
 		AudioTrack track = playedqueue.remove(0);
 		
-		audioPlayer.startTrack(track, false);
+		play(track);
 		
 		if (oldTrack != null) {
 			queue.add(0, oldTrack.makeClone());
 		}
+	}
+	
+	private void play(AudioTrack track) {
+		Captions captions = Captions.CreateCaptions();
+		String thumbnail = "";
+		try(HttpInterface httpInterface = httpInterfaceManager.getInterface()) {
+			JsonBrowser videoInfo = YoutubeAudioTrackInfo.getVideoData(httpInterface, track.getIdentifier());
+			captions = Captions.CreateCaptions(httpInterface, videoInfo);
+			thumbnail = videoInfo.get("videoDetails").get("thumbnail").get("thumbnails").index(3).get("url").text();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		track.setUserData(new YoutubeAudioTrackInfo(captions, thumbnail));
+		audioPlayer.startTrack(track, false);
 	}
 	
 	public void clearHistory() {
@@ -115,6 +142,72 @@ public class AudioEventHandler implements AudioEventListener {
 	
 	public void clearQueue() {
 		queue.clear();
+	}
+	
+	public String printQueue() {
+		if (queue.size() == 0) return "";
+		StringBuilder sb = new StringBuilder();
+		StringBuilder last = new StringBuilder();
+		
+		int size = queue.size();
+		last.append(size);
+		last.append(") ");
+		last.append(queue.get(size - 1).getInfo().title);
+		
+		for (int i = 0; i < size; i++) {
+			
+			StringBuilder temp = new StringBuilder();
+			temp.append(i + 1);
+			temp.append(") ");
+			temp.append(queue.get(i).getInfo().title);
+			temp.append('\n');
+			
+			if (sb.length() + temp.length() + last.length()> 1000) {
+				sb.append("...\n");
+				sb.append(last);
+				break;
+			}
+			
+			sb.append(temp);
+		}
+		return sb.toString();
+	}
+	
+	public String printHistory() {
+		if (playedqueue.size() == 0) return "";
+		StringBuilder sb = new StringBuilder();
+		StringBuilder last = new StringBuilder();
+		
+		int size = playedqueue.size();
+		last.append(size);
+		last.append(") ");
+		last.append(playedqueue.get(size - 1).getInfo().title);
+		
+		for (int i = 0; i < size; i++) {
+			
+			StringBuilder temp = new StringBuilder();
+			temp.append(i + 1);
+			temp.append(") ");
+			temp.append(playedqueue.get(i).getInfo().title);
+			temp.append('\n');
+			
+			if (sb.length() + temp.length() + last.length()> 1000) {
+				sb.append("...\n");
+				sb.append(last);
+				break;
+			}
+			
+			sb.append(temp);
+		}
+		return sb.toString();
+	}
+	
+	public void removeFromQueue(int index) {
+		queue.remove(index - 1);
+	}
+	
+	public void removeFromHistory(int index) {
+		playedqueue.remove(index - 1);
 	}
 	
 	private void repeat() {
@@ -167,7 +260,7 @@ public class AudioEventHandler implements AudioEventListener {
 		
 		AudioTrack track = queue.remove(0);
 		
-		audioPlayer.startTrack(track, false);
+		play(track);
 	}
 	
 }

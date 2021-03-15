@@ -11,11 +11,13 @@ import piman.TestBot;
 import piman.events.commands.CommandBase;
 import piman.events.commands.CommandGetPrefix;
 import piman.events.commands.CommandHelp;
+import piman.events.commands.CommandHistory;
 import piman.events.commands.CommandJoin;
 import piman.events.commands.CommandLeave;
 import piman.events.commands.CommandPasswordBase;
 import piman.events.commands.CommandPlay;
 import piman.events.commands.CommandPlaylist;
+import piman.events.commands.CommandQueue;
 import piman.events.commands.CommandReloadSettings;
 import piman.events.commands.CommandRemovePlayBar;
 import piman.events.commands.CommandSetAdminPassword;
@@ -23,8 +25,6 @@ import piman.events.commands.CommandSetChannel;
 import piman.events.commands.CommandSetPrefix;
 import piman.events.commands.CommandShutdown;
 import piman.events.commands.CommandBase.Visibility;
-import piman.events.commands.CommandClearHistory;
-import piman.events.commands.CommandClearQueue;
 import piman.events.commands.CommandCreatePlayBar;
 import piman.exceptions.InvalidAccessException;
 import piman.exceptions.NoPasswordException;
@@ -44,9 +44,9 @@ public class TextChannelMessageEventHandler implements EventListener {
 		registeredCommands.add(new CommandPlay("Play", Visibility.CHANNEL));
 		registeredCommands.add(new CommandCreatePlayBar("CreatePlayBar", Visibility.CHANNEL));
 		registeredCommands.add(new CommandRemovePlayBar("RemovePlayBar", Visibility.CHANNEL));
-		registeredCommands.add(new CommandClearHistory("ClearHistory", Visibility.CHANNEL));
+		registeredCommands.add(new CommandHistory("History", Visibility.CHANNEL));
 		registeredCommands.add(new CommandReloadSettings("ReloadSettings", Visibility.NONE));
-		registeredCommands.add(new CommandClearQueue("ClearQueue", Visibility.CHANNEL));
+		registeredCommands.add(new CommandQueue("Queue", Visibility.CHANNEL));
 		registeredCommands.add(new CommandSetAdminPassword("SetAdminPassword", Visibility.ALL));
 		registeredCommands.add(new CommandPlaylist("Playlist", Visibility.CHANNEL));
 		registeredCommands.add(new CommandShutdown("Shutdown", Visibility.CHANNEL));
@@ -62,7 +62,7 @@ public class TextChannelMessageEventHandler implements EventListener {
 
 	@Override
 	public void onEvent(GenericEvent event) {
-		if (event instanceof GuildMessageReceivedEvent) {
+		if (event instanceof GuildMessageReceivedEvent && !((GuildMessageReceivedEvent) event).getAuthor().equals(TestBot.jda.getSelfUser())) {
 
 			Message message = ((GuildMessageReceivedEvent) event).getMessage();
 			
@@ -91,7 +91,7 @@ public class TextChannelMessageEventHandler implements EventListener {
 										command.run(message, input);
 									}
 									catch (SyntaxErrorException e) {
-										message.getChannel().sendMessage("Syntax Error, Correct Usage: `" + command.getUsage() + "`").queue();
+										message.getChannel().sendMessage("Syntax Error: `" + e.getMessage() + "`\n    Correct Usage: `" + command.getUsage() + "`").queue();
 									}
 									catch (InvalidAccessException e) {
 										message.getChannel().sendMessage(e.getMessage()).queue();

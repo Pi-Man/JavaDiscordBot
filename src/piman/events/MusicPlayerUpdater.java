@@ -1,7 +1,9 @@
 package piman.events;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -9,8 +11,10 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.BaseAudioTrack;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -21,6 +25,8 @@ import piman.TestBot;
 import piman.config.BotConfig;
 import piman.music.AudioEventHandler;
 import piman.playlist.PlayList;
+import piman.youtube.Captions;
+import piman.youtube.YoutubeAudioTrackInfo;
 
 public class MusicPlayerUpdater implements EventListener{
 	
@@ -228,24 +234,29 @@ public class MusicPlayerUpdater implements EventListener{
 		
 		if (hasChannel(guildID)) {
 			
-			if (!hasMessage(guildID)) {
+			if (!hasMessages(guildID)) {
 			
 				AudioTrack track = TestBot.getAudioPlayer(guildID).getPlayingTrack();
-							
-				Message message = getChannel(guildID).sendMessage(getMessageString(track, guildID)).complete();
-					
-				setMessage(message.getId(), guildID); 
 				
-				message.addReaction(PREV).queue();
-				message.addReaction(BACK).queue();
-				message.addReaction(PLAY).queue();
-				message.addReaction(FORW).queue();
-				message.addReaction(NEXT).queue();
-				message.addReaction(CLER).queue();
-				message.addReaction(SHFL).queue();
-				message.addReaction(REPT).queue();
-				message.addReaction(RPT1).queue();
-				message.addReaction(RSET).queue();
+				MessageEmbed headerEmbed = getHeaderMessageEmbed(track, guildID);
+				Message headerMessage = getChannel(guildID).sendMessage(headerEmbed).complete();
+				
+				MessageEmbed barEmbed = getBarMessageEmbed(track, guildID);
+				Message barMessage = getChannel(guildID).sendMessage(barEmbed).complete();
+				
+				setHeaderMessage(headerMessage.getId(), guildID);
+				setBarMessage(barMessage.getId(), guildID); 
+				
+				barMessage.addReaction(PREV).queue();
+				barMessage.addReaction(BACK).queue();
+				barMessage.addReaction(PLAY).queue();
+				barMessage.addReaction(FORW).queue();
+				barMessage.addReaction(NEXT).queue();
+				barMessage.addReaction(CLER).queue();
+				barMessage.addReaction(SHFL).queue();
+				barMessage.addReaction(REPT).queue();
+				barMessage.addReaction(RPT1).queue();
+				barMessage.addReaction(RSET).queue();
 			
 			}
 			
@@ -262,7 +273,30 @@ public class MusicPlayerUpdater implements EventListener{
 		
 	}
 	
-	private String getMessageString(AudioTrack track, String guildID) {
+	private MessageEmbed getHeaderMessageEmbed(AudioTrack track, String guildID) {
+		EmbedBuilder builder = new EmbedBuilder().setTitle(track == null ? "No Song Playing" : track.getInfo().title);
+		if (track != null) {
+			builder.addField("Link", track.getInfo().uri, false);
+		}
+		builder.addField("Playing", TestBot.getAudioPlayer(guildID).isPaused() ? ":pause_button:" : ":arrow_forward:", true)
+				.addField("Shuffle", TestBot.getConfig(guildID).getSetting("shuffle", Boolean.class) ? ":white_check_mark:" : ":x:", true)
+				.addField("Repeat", TestBot.getConfig(guildID).getSetting("repeat", Boolean.class) ? ":white_check_mark:" : ":x:", true)
+				.setColor(TestBot.EMBED_COLOR);
+		
+		if (track != null && track.getUserData() instanceof YoutubeAudioTrackInfo) {
+			
+			YoutubeAudioTrackInfo ytTrackInfo = (YoutubeAudioTrackInfo) track.getUserData();
+			
+			if (ytTrackInfo.getThumbnail() != null && !ytTrackInfo.getThumbnail().isEmpty()) {
+				builder.setThumbnail(ytTrackInfo.getThumbnail());
+			}
+			
+		}
+		
+		return builder.build();
+	}
+	
+	private MessageEmbed getBarMessageEmbed(AudioTrack track, String guildID) {
 		
 		String seeker = "";
 		
@@ -270,21 +304,53 @@ public class MusicPlayerUpdater implements EventListener{
 			seeker = seeker.concat("*");
 		}
 		
-		return String.format("TestBot Music Player %s\n"
-				+ "Now Playing: %s\n"
-				+ "Repeat: %s\n"
-				+ "Shuffle: %s\n"
-				+ "`%s`\n"
-				+ "`%s`\n"
-				+ "`%s`",
-				TestBot.getAudioPlayer(guildID).isPaused() ? ":pause_button:" : ":arrow_forward:",
-				track == null ? "nothing" : track.getInfo().title,
-				TestBot.getConfig(guildID).getSetting("repeat", Boolean.class) ? ":white_check_mark:" : ":x:",
-				TestBot.getConfig(guildID).getSetting("shuffle", Boolean.class) ? ":white_check_mark:" : ":x:",
-				getTime(track),
-				seeker,
-				fillProgressBar());
+		EmbedBuilder builder = new EmbedBuilder()
+				.addField("", String.format(
+						"`%s`\n"
+						+ "`%s`\n"
+						+ "`%s`",
+						getTime(track),
+						seeker,
+						fillProgressBar())
+					, false)
+				.setFooter("Blackberry Pi Music Player", TestBot.jda.getSelfUser().getAvatarUrl())
+				.setColor(TestBot.EMBED_COLOR);
 		
+		if (track != null && track.getUserData() instanceof YoutubeAudioTrackInfo) {
+			
+			YoutubeAudioTrackInfo ytTrackInfo = (YoutubeAudioTrackInfo) track.getUserData();
+			
+			Captions captions = ytTrackInfo.getCaptions();
+			List<String> capEvents = new ArrayList<>();
+			int length = 0;
+			for (Captions.Event event : captions.getEvents()) {
+				if (event.isInRange(track.getPosition(), 2000)) {
+					if (checkDuplicateCaptions(capEvents, event.getText())) {
+						length += event.getText().length();
+						if (length > MessageEmbed.VALUE_MAX_LENGTH) break;
+						capEvents.add(event.getText());
+					}
+				}
+			}
+			
+			if (!capEvents.isEmpty()) {
+				String s = String.join("\n", capEvents);
+				builder.addField("captions", s.substring(0, Math.min(s.length(), MessageEmbed.VALUE_MAX_LENGTH)), false);
+			}
+			
+		}
+		
+		return builder.build();
+		
+	}
+	
+	private boolean checkDuplicateCaptions(List<String> capEvents, String caption) {
+		for (String event : capEvents) {
+			if (event.contains(caption) || caption.contains(event) || event.equals(caption)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private String getTime(AudioTrack track) {
@@ -327,33 +393,35 @@ public class MusicPlayerUpdater implements EventListener{
 		
 		if (hasChannel(guildID)) {
 			try {
-				getChannel(guildID).deleteMessageById(getMessage(guildID)).queue();
+				getChannel(guildID).deleteMessageById(getHeaderMessage(guildID)).queue();
+				getChannel(guildID).deleteMessageById(getBarMessage(guildID)).queue();
 			}
 			catch (Exception e) {
 				e.printStackTrace();
 			}
 			finally {
 				removeChannel(guildID);
-				removeMessage(guildID);
+				removeMessages(guildID);
 			}
 		}
 				
 	}
 	
 	private void main(String guildID) {
-		try {
-			while(!getMessage(guildID).isEmpty()) {
-				
-				update(guildID);
-				
+		while(!getBarMessage(guildID).isEmpty()) {
+							
+			update(guildID);
+			
+			try {
 				TimeUnit.SECONDS.sleep(2);
-				
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			
 		}
 	}
-	
+	private MessageEmbed oldHeaderEmbed;
+	private MessageEmbed oldBarEmbed;
 	private void update(String guildID) {
 		
 		AudioTrack track = TestBot.getAudioPlayer(guildID).getPlayingTrack();
@@ -365,14 +433,20 @@ public class MusicPlayerUpdater implements EventListener{
 		try {
 			TestBot.jda.awaitReady();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		getChannel(guildID).editMessageFormatById(getMessage(guildID), getMessageString(track, guildID)).queue(
-			null, 
-			error -> getChannel(guildID).sendMessage(getMessageString(track, guildID)).queue(message -> setMessage(message.getId(), guildID))
-		);
+		MessageEmbed headerEmbed = getHeaderMessageEmbed(track, guildID);
+		MessageEmbed barEmbed = getBarMessageEmbed(track, guildID);
+		
+		if (!barEmbed.equals(oldBarEmbed)) {
+			getChannel(guildID).editMessageById(getBarMessage(guildID), barEmbed).queue();
+			oldBarEmbed = barEmbed;
+		}
+		if (!headerEmbed.equals(oldHeaderEmbed)) {
+			getChannel(guildID).editMessageById(getHeaderMessage(guildID), headerEmbed).queue();
+			oldHeaderEmbed = headerEmbed;
+		}
 		
 	}
 	
@@ -458,23 +532,35 @@ public class MusicPlayerUpdater implements EventListener{
 		return TestBot.getConfig(guildID).removeSetting("playbarChannel", String.class);
 	}
 	
-	public String getMessage(String guildID) {
+	public String getBarMessage(String guildID) {
 		return TestBot.getConfig(guildID).getSetting("playbarMessage", String.class);
 	}
 	
-	public void setMessage(String messageID, String guildID) {
+	public void setBarMessage(String messageID, String guildID) {
 		TestBot.getConfig(guildID).setSetting("playbarMessage", messageID);
 	}
 	
-	public boolean hasMessage(String guildID) {
-		boolean flag = TestBot.getConfig(guildID).hasSetting("playbarMessage", String.class) && !TestBot.getConfig(guildID).getSetting("playbarMessage",  String.class).isEmpty();
+	public boolean hasMessages(String guildID) {
+		boolean flag = TestBot.getConfig(guildID).hasSetting("playbarMessage", String.class)
+				&& !TestBot.getConfig(guildID).getSetting("playbarMessage",  String.class).isEmpty()
+				&& TestBot.getConfig(guildID).hasSetting("headerMessage", String.class)
+				&& !TestBot.getConfig(guildID).getSetting("headerMessage", String.class).isEmpty();
 		if (flag && hasChannel(guildID)) {
-			flag &= getChannel(guildID).retrieveMessageById(getMessage(guildID)).complete() != null;
+			flag &= getChannel(guildID).retrieveMessageById(getBarMessage(guildID)).complete() != null;
+			flag &= getChannel(guildID).retrieveMessageById(getHeaderMessage(guildID)).complete() != null;
 		}
 		return flag;
 	}
 	
-	public boolean removeMessage(String guildID) {
+	public String getHeaderMessage(String guildID) {
+		return TestBot.getConfig(guildID).getSetting("headerMessage", String.class);
+	}
+	
+	public void setHeaderMessage(String messageID, String guildID) {
+		TestBot.getConfig(guildID).setSetting("headerMessage", messageID);
+	}
+		
+	public boolean removeMessages(String guildID) {
 		return TestBot.getConfig(guildID).removeSetting("playbarMessage", String.class);
 	}
 	

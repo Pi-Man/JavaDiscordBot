@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.entities.Message;
 import piman.TestBot;
 import piman.exceptions.SyntaxErrorException;
 
+@Deprecated
 public class CommandClearHistory extends CommandBase {
 
 	public CommandClearHistory(String identifier, Visibility visibility) {

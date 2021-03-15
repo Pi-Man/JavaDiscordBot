@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.entities.Message;
 import piman.TestBot;
 import piman.exceptions.SyntaxErrorException;
 
+@Deprecated
 public class CommandClearQueue extends CommandBase {
 
 	public CommandClearQueue(String identifier, Visibility visibility) {

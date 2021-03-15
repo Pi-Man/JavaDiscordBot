@@ -15,7 +15,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
-
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDA.Status;
 import net.dv8tion.jda.api.JDABuilder;
@@ -32,6 +31,7 @@ public class TestBot {
 	public static AudioPlayerManager playerManager;
 	private static Map<String, Pair<AudioPlayer, AudioEventHandler>> audioPlayers = new HashMap<String, Pair<AudioPlayer, AudioEventHandler>>();
 	public static final MusicPlayerUpdater MUSIC_PLAYER = new MusicPlayerUpdater();
+	public static final int EMBED_COLOR = 0x6000c0;
 	
 	public static TaskExecutor commandExcecutor;
 	
@@ -64,6 +64,23 @@ public class TestBot {
 		
 		playerManager = new DefaultAudioPlayerManager();
 		AudioSourceManagers.registerRemoteSources(playerManager);
+//	    playerManager.registerSourceManager(new YoutubeAudioSourceManager(
+//	    		true,
+//	            new CustomYoutubeTrackDetailsLoader(),
+//	            new YoutubeSearchProvider(),
+//	            new YoutubeSearchMusicProvider(),
+//	            new YoutubeSignatureCipherManager(),
+//	            new CustomYoutubePlaylistLoader(),
+//	            new DefaultYoutubeLinkRouter(),
+//	            new YoutubeMixProvider()
+//	    		));
+//	    playerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
+//	    playerManager.registerSourceManager(new BandcampAudioSourceManager());
+//	    playerManager.registerSourceManager(new VimeoAudioSourceManager());
+//	    playerManager.registerSourceManager(new TwitchStreamAudioSourceManager());
+//	    playerManager.registerSourceManager(new BeamAudioSourceManager());
+//	    playerManager.registerSourceManager(new GetyarnAudioSourceManager());
+//	    playerManager.registerSourceManager(new HttpAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY));
 				
 		commandExcecutor = new TaskExecutor();
 		
@@ -85,7 +102,8 @@ public class TestBot {
 	}
 
 	public static String getPrefix(String guildID) {
-		return getConfig(guildID).getSetting("prefix", String.class);
+		String p = getConfig(guildID).getSetting("prefix", String.class);
+		return p.isEmpty() ? "$" : p;
 	}
 	
 	public static AudioPlayer getAudioPlayer(String guildID) {
