@@ -31,7 +31,8 @@ public class TestBot {
 	public static AudioPlayerManager playerManager;
 	private static Map<String, Pair<AudioPlayer, AudioEventHandler>> audioPlayers = new HashMap<String, Pair<AudioPlayer, AudioEventHandler>>();
 	public static final MusicPlayerUpdater MUSIC_PLAYER = new MusicPlayerUpdater();
-	public static final int EMBED_COLOR = 0x6000c0;
+	public static final int EMBED_COLOR_A = 0x10ff10;
+	public static final int EMBED_COLOR_B = 0x6000c0;
 	
 	public static TaskExecutor commandExcecutor;
 	
@@ -55,7 +56,7 @@ public class TestBot {
 		
 		bufferedReader.close();
 		
-		jda = new JDABuilder(token).setEventManager(new MainEventManager()).build();
+		jda = JDABuilder.createDefault(token).setEventManager(new MainEventManager()).build();
 		
 		jda.addEventListener(
 			textChannelMessageHandler,

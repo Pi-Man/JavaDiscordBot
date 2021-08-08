@@ -8,13 +8,21 @@
 
 //*
 // Apply the java plugin to add support for Java
-apply plugin: 'java'
+//apply plugin: 'java'
+plugins {
+	id 'application'
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    mavenCentral() // for transitive dependencies
+    maven {
+      name 'm2-dv8tion'
+      url 'https://m2.dv8tion.net/releases'
+    }
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -22,26 +30,37 @@ dependencies {
     // The production code uses the SLF4J logging API at compile time
     implementation 'org.slf4j:slf4j-api:1.7.25'
   	implementation 'com.sedmelluq:lavaplayer:1.3.73'
-    implementation 'net.dv8tion:JDA:4.0.0_39'
+    implementation 'net.dv8tion:JDA:4.3.0_283'
     implementation 'org.apache.commons:commons-text:1.9'
     
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
     // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
-    testCompile 'junit:junit:4.12'
+    implementation 'junit:junit:4.12'
+}
+
+application {
+	mainClass = 'piman.TestBot'
 }
 
 jar {
-    // Keep jar clean:
-    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
-
-    manifest {
-        attributes 'Main-Class': 'piman.TestBot',
-                   'Class-Path': configurations.runtime.files.collect { "lib/$it.name" }.join(' ')
-    }
-    // How-to add class path:
-    //     https://stackoverflow.com/questions/22659463/add-classpath-in-manifest-using-gradle
-    //     https://gist.github.com/simon04/6865179
+	manifest {
+		attributes 'Main-Class': 'piman.TestBot'
+				   //'Class-Path': configurations.runtime.files.collect { "lib/$it.name" }.join(' ')
+	}
 }
+
+//jar {
+//    // Keep jar clean:
+//    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'sMETA-INF/*.RSA', 'META-INF/*.MF'
+//
+//    manifest {
+//        attributes 'Main-Class': 'piman.TestBot',
+//                   'Class-Path': configurations.runtime.files.collect { "lib/$it.name" }.join(' ')
+//    }
+//    // How-to add class path:
+//    //     https://stackoverflow.com/questions/22659463/add-classpath-in-manifest-using-gradle
+//    //     https://gist.github.com/simon04/6865179
+//}
 //*/

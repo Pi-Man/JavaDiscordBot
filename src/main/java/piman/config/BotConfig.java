@@ -1,48 +1,45 @@
 package piman.config;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public class BotConfig {
-	private static final String PATH = "resources/assets/config/";
-	
-	private final String location;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
+import piman.TestBot;
+
+public class BotConfig {	
+	private final String guild;
 
 	private Set<SettingsEntry> settings = new HashSet<SettingsEntry>();
 
-	public BotConfig(String location) {
-		this.location = location + ".txt";
-	}
-	
-	private File getFile() throws IOException {
-		
-		File path = new File(PATH);
-		File file = new File(PATH + location);
-		
-		if (!path.isDirectory()) {
-			path.mkdirs();
-		}
-		
-		if (!file.isFile()) {
-			file.createNewFile();
-		}
-		
-		return file;
+	public BotConfig(String guild) {
+		this.guild = guild;
 	}
 
 	public void read() throws IOException {
 
 		settings.clear();
 		
-		File file = getFile();
+		List<TextChannel> channels = TestBot.jda.getGuildById(guild).getTextChannelsByName("blackberry-pi-data", true);
+		
+		if (channels.size() == 0) return;
+		
+		List<Message> messages = channels.get(0).getHistoryFromBeginning(10).complete().getRetrievedHistory();
+		
+		if (messages.size() == 0) return;
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (Message message : messages) {
+			sb.append(message.getContentRaw());
+		}
 
-		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(sb.toString()));
 
 		String line;
 
@@ -69,10 +66,22 @@ public class BotConfig {
 	}
 
 	public void write() throws IOException {
-
-		File file = getFile();
 		
-		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+		List<TextChannel> channels = TestBot.jda.getGuildById(guild).getTextChannelsByName("blackberry-pi-data", true);
+		
+		if (channels.size() == 0) return;
+		
+		List<Message> messages = channels.get(0).getHistoryFromBeginning(10).complete().getRetrievedHistory();
+		
+		for (Message message : messages) {
+			message.delete().complete();
+		}
+		
+		List<StringBuilder> sb = new ArrayList<>();
+		
+		sb.add(new StringBuilder(2000));
+		
+		int index = 0;
 
 		for (SettingsEntry entry : this.settings) {
 
@@ -87,12 +96,21 @@ public class BotConfig {
 			else if (entry.getValue() instanceof Boolean) {
 				type = ":B:";
 			}
-
-			bufferedWriter.write(entry.getKey() + type + entry.getValue().toString() + "\n");
+			
+			String line = entry.getKey() + type + entry.getValue().toString() + "\n";
+			
+			if (sb.get(index).length() + line.length() > 2000) {
+				sb.add(new StringBuilder(2000));
+				index++;
+			}
+			
+			sb.get(index).append(line);
 
 		}
-
-		bufferedWriter.close();
+		
+		for (StringBuilder builder : sb) {
+			channels.get(0).sendMessage(builder.toString()).complete();
+		}
 
 	}
 

@@ -7,9 +7,9 @@ import net.dv8tion.jda.api.entities.Message;
 import piman.TestBot;
 import piman.exceptions.SyntaxErrorException;
 
-public class CommandHistory extends CommandBase {
+public class CommandQueue extends CommandBase {
 
-	public CommandHistory(String identifier, Visibility visibility) {
+	public CommandQueue(String identifier, Visibility visibility) {
 		super(identifier, visibility);
 	}
 
@@ -27,15 +27,15 @@ public class CommandHistory extends CommandBase {
 		}
 		else if (args.length == 1) {
 			if (args[0].toLowerCase(Locale.ROOT).equals("view")) {
-				String text = TestBot.getAudioEventHandler(message.getGuild().getId()).printHistory();
+				String text = TestBot.getAudioEventHandler(message.getGuild().getId()).printQueue();
 				EmbedBuilder builder = new EmbedBuilder();
-				builder.setTitle("History");
-				builder.addField("previous songs", text.isEmpty() ? "History is Empty" : text, false);
-				builder.setColor(TestBot.EMBED_COLOR);
+				builder.setTitle("Queue");
+				builder.addField("next songs", text.isEmpty() ? "Queue is Empty" : text, false);
+				builder.setColor(TestBot.EMBED_COLOR_B);
 				message.getChannel().sendMessage(builder.build()).queue();
 			}
 			else if (args[0].toLowerCase(Locale.ROOT).equals("clear")) {
-				TestBot.getAudioEventHandler(message.getGuild().getId()).clearHistory();
+				TestBot.getAudioEventHandler(message.getGuild().getId()).clearQueue();
 			}
 			else if (args[0].toLowerCase(Locale.ROOT).equals("remove")) {
 				throw new SyntaxErrorException("Missing index");
@@ -48,7 +48,7 @@ public class CommandHistory extends CommandBase {
 			if (args[0].toLowerCase(Locale.ROOT).equals("remove")) {
 				try {
 					int i = Integer.valueOf(args[1]);
-					TestBot.getAudioEventHandler(message.getGuild().getId()).removeFromHistory(i);
+					TestBot.getAudioEventHandler(message.getGuild().getId()).removeFromQueue(i);
 				}
 				catch (NumberFormatException e) {
 					throw new SyntaxErrorException("Invalid Integer: " + args[1]);

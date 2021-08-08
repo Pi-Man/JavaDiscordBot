@@ -281,7 +281,7 @@ public class MusicPlayerUpdater implements EventListener{
 		builder.addField("Playing", TestBot.getAudioPlayer(guildID).isPaused() ? ":pause_button:" : ":arrow_forward:", true)
 				.addField("Shuffle", TestBot.getConfig(guildID).getSetting("shuffle", Boolean.class) ? ":white_check_mark:" : ":x:", true)
 				.addField("Repeat", TestBot.getConfig(guildID).getSetting("repeat", Boolean.class) ? ":white_check_mark:" : ":x:", true)
-				.setColor(TestBot.EMBED_COLOR);
+				.setColor(TestBot.EMBED_COLOR_A);
 		
 		if (track != null && track.getUserData() instanceof YoutubeAudioTrackInfo) {
 			
@@ -314,7 +314,7 @@ public class MusicPlayerUpdater implements EventListener{
 						fillProgressBar())
 					, false)
 				.setFooter("Blackberry Pi Music Player", TestBot.jda.getSelfUser().getAvatarUrl())
-				.setColor(TestBot.EMBED_COLOR);
+				.setColor(TestBot.EMBED_COLOR_B);
 		
 		if (track != null && track.getUserData() instanceof YoutubeAudioTrackInfo) {
 			

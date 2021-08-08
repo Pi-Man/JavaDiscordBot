@@ -15,4 +15,4 @@ include 'api'
 include 'services:webservice'
 */
 
-rootProject.name = 'test_bot'
+rootProject.name = 'blackberry_pi_music'

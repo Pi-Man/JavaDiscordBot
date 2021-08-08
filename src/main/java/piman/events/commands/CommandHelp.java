@@ -21,7 +21,7 @@ public class CommandHelp extends CommandBase {
 		EmbedBuilder builder = new EmbedBuilder();
 		builder.setTitle("Help");
 		builder.addField("commands", TestBot.getTextChannelMessageHandler().getHelpString(), false);
-		builder.setColor(TestBot.EMBED_COLOR);
+		builder.setColor(TestBot.EMBED_COLOR_B);
 		message.getTextChannel().sendMessage(builder.build()).complete();
 	}
 
