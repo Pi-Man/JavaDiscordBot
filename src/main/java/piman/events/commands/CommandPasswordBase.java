@@ -40,6 +40,8 @@ public abstract class CommandPasswordBase extends CommandBase {
 			throw new IncorrectPasswordException();
 		}
 		
+		message.getJDA().removeEventListener(passwordlistener);
+		
 		message1.delete().queue();
 		
 	}

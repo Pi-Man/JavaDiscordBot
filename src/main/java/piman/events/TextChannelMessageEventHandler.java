@@ -32,29 +32,35 @@ import piman.exceptions.SyntaxErrorException;
 
 public class TextChannelMessageEventHandler implements EventListener {
 
-	private List<CommandBase> registeredCommands = new ArrayList<CommandBase>();
+	private List<CommandBase> visibleCommands = new ArrayList<>();
+	private List<CommandBase> hiddenCommands = new ArrayList<>();
+	
+	private List<CommandBase> allCommands = new ArrayList<>();
 
 	public TextChannelMessageEventHandler() {
-		registeredCommands.add(new CommandHelp("Help", Visibility.CHANNEL));
-		registeredCommands.add(new CommandSetChannel("SetChannel", Visibility.NONE));
-		registeredCommands.add(new CommandSetPrefix("SetPrefix", Visibility.CHANNEL));
-		registeredCommands.add(new CommandGetPrefix("Prefix", Visibility.NONE));
-		registeredCommands.add(new CommandJoin("Join", Visibility.CHANNEL));
-		registeredCommands.add(new CommandLeave("Leave", Visibility.CHANNEL));
-		registeredCommands.add(new CommandPlay("Play", Visibility.CHANNEL));
-		registeredCommands.add(new CommandCreatePlayBar("CreatePlayBar", Visibility.CHANNEL));
-		registeredCommands.add(new CommandRemovePlayBar("RemovePlayBar", Visibility.CHANNEL));
-		registeredCommands.add(new CommandHistory("History", Visibility.CHANNEL));
-		registeredCommands.add(new CommandReloadSettings("ReloadSettings", Visibility.NONE));
-		registeredCommands.add(new CommandQueue("Queue", Visibility.CHANNEL));
-		registeredCommands.add(new CommandSetAdminPassword("SetAdminPassword", Visibility.ALL));
-		registeredCommands.add(new CommandPlaylist("Playlist", Visibility.CHANNEL));
-		registeredCommands.add(new CommandShutdown("Shutdown", Visibility.CHANNEL));
+		visibleCommands.add(new CommandHelp("Help", Visibility.CHANNEL));
+		hiddenCommands.add(new CommandSetChannel("SetChannel", Visibility.NONE));
+		hiddenCommands.add(new CommandSetPrefix("SetPrefix", Visibility.CHANNEL));
+		visibleCommands.add(new CommandGetPrefix("Prefix", Visibility.NONE));
+		visibleCommands.add(new CommandJoin("Join", Visibility.CHANNEL));
+		visibleCommands.add(new CommandLeave("Leave", Visibility.CHANNEL));
+		visibleCommands.add(new CommandPlay("Play", Visibility.CHANNEL));
+		hiddenCommands.add(new CommandCreatePlayBar("CreatePlayBar", Visibility.CHANNEL));
+		hiddenCommands.add(new CommandRemovePlayBar("RemovePlayBar", Visibility.CHANNEL));
+		visibleCommands.add(new CommandHistory("History", Visibility.CHANNEL));
+		hiddenCommands.add(new CommandReloadSettings("ReloadSettings", Visibility.NONE));
+		visibleCommands.add(new CommandQueue("Queue", Visibility.CHANNEL));
+		hiddenCommands.add(new CommandSetAdminPassword("SetAdminPassword", Visibility.ALL));
+		visibleCommands.add(new CommandPlaylist("Playlist", Visibility.CHANNEL));
+		hiddenCommands.add(new CommandShutdown("Shutdown", Visibility.CHANNEL));
+		
+		allCommands.addAll(visibleCommands);
+		allCommands.addAll(hiddenCommands);
 	}
 	
 	public String getHelpString() {
 		String help = "";
-		for (CommandBase command : registeredCommands) {
+		for (CommandBase command : visibleCommands) {
 			help = help.concat(command.getIdentifier() + " " + command.getUsage() + "\n");
 		}
 		return help;
@@ -79,32 +85,28 @@ public class TextChannelMessageEventHandler implements EventListener {
 			public void run() {
 				List<Runnable> tasks = new ArrayList<>();
 				for (String input : commands) {
-					for (CommandBase command : registeredCommands) {
+					for (CommandBase command : allCommands) {
 						if (command.acceptes(message.getTextChannel(), input)) {
-							Runnable task = new Runnable() {
-								@Override
-								public void run() {
-									try {
-										if (command instanceof CommandPasswordBase) {
-											((CommandPasswordBase) command).requestPassword(message, input);
-										}
-										command.run(message, input);
+							tasks.add(() -> {
+								try {
+									if (command instanceof CommandPasswordBase) {
+										((CommandPasswordBase) command).requestPassword(message, input);
 									}
-									catch (SyntaxErrorException e) {
-										message.getChannel().sendMessage("Syntax Error: `" + e.getMessage() + "`\n    Correct Usage: `" + command.getUsage() + "`").queue();
-									}
-									catch (InvalidAccessException e) {
-										message.getChannel().sendMessage(e.getMessage()).queue();
-									}
-									catch (NoPasswordException e) {
-										message.getChannel().sendMessage("No Password Set").queue();
-									} 
-									catch (Exception e) {
-										e.printStackTrace();
-									}
+									command.run(message, input);
 								}
-							};
-							tasks.add(task);
+								catch (SyntaxErrorException e) {
+									message.getChannel().sendMessage("Syntax Error: `" + e.getMessage() + "`\n    Correct Usage: `" + command.getUsage() + "`").queue();
+								}
+								catch (InvalidAccessException e) {
+									message.getChannel().sendMessage(e.getMessage()).queue();
+								}
+								catch (NoPasswordException e) {
+									message.getChannel().sendMessage("No Password Set").queue();
+								} 
+								catch (Exception e) {
+									e.printStackTrace();
+								}
+							});
 						}
 					}
 				}

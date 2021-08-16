@@ -2,6 +2,7 @@ package piman.events.commands;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -17,24 +18,31 @@ public class CommandSetChannel extends CommandBase {
 
 	@Override
 	public void run(Message message, String input) throws SyntaxErrorException {
-
-		List<TextChannel> channels = this.getTextChannels(message.getGuild(), input);
 		
 		String[] args = this.getArgs(message, input);
-
-		if (channels.size() == 1) {
-			this.setChannel(message, channels.get(0).getId());
-		} 
-		else if (channels.isEmpty() && args.length == 1) {
-			if (args[0].toLowerCase().equals("none")) {
+		
+		if (args.length == 0) {
+			throw new SyntaxErrorException("Missing argument");
+		}
+		else if (args.length == 1) {
+			if (args[0].toLowerCase(Locale.ROOT).equals("none")) {
 				this.setChannel(message, "");
-			} 
-			else {
-				throw new SyntaxErrorException("");
 			}
-		} 
+			else {
+				List<TextChannel> channels = this.getTextChannels(message.getGuild(), input);
+				if (channels.size() == 0) {
+					throw new SyntaxErrorException("Could not find channel");
+				}
+				else if (channels.size() == 1) {
+					this.setChannel(message, channels.get(0).getId());
+				}
+				else {
+					throw new SyntaxErrorException("Found more than one Channel");
+				}
+			}
+		}
 		else {
-			throw new SyntaxErrorException("");
+			throw new SyntaxErrorException("Too many arguments");
 		}
 	}
 

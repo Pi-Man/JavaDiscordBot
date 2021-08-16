@@ -3,8 +3,10 @@ package piman.events.commands;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import piman.TestBot;
 import piman.exceptions.SyntaxErrorException;
@@ -48,6 +50,11 @@ public abstract class CommandBase {
 		}
 
 		return flag;
+	}
+	
+	protected void reply(Message message, String title, String contents) {
+		MessageEmbed embed = new EmbedBuilder().setTitle(title).addField("", contents, false).setColor(TestBot.EMBED_COLOR_B).build();
+		message.getChannel().sendMessageEmbeds(embed).queue();
 	}
 
 	protected String[] getArgs(Message message, String input) {

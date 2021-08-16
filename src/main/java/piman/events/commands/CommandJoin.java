@@ -1,6 +1,7 @@
 package piman.events.commands;
 
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import piman.exceptions.SyntaxErrorException;
 
 public class CommandJoin extends CommandBase {
@@ -21,7 +22,9 @@ public class CommandJoin extends CommandBase {
 
 		if (args.length == 0) {
 			try {
-				message.getGuild().getAudioManager().openAudioConnection(message.getMember().getVoiceState().getChannel());
+				VoiceChannel vc = message.getMember().getVoiceState().getChannel();
+				message.getGuild().getAudioManager().openAudioConnection(vc);
+				message.getChannel().sendMessage(String.format("Connected to Voice Channel: %s", vc.getName())).queue();
 			} 
 			catch (IllegalArgumentException e) {
 				message.getChannel().sendMessage("You are not in a Voice Channel").queue();
@@ -29,14 +32,16 @@ public class CommandJoin extends CommandBase {
 		} 
 		else if (args.length == 1) {
 			try {
-				message.getGuild().getAudioManager().openAudioConnection(message.getJDA().getVoiceChannelById(args[0]));
+				VoiceChannel vc = message.getJDA().getVoiceChannelById(args[0]);
+				message.getGuild().getAudioManager().openAudioConnection(vc);
+				message.getChannel().sendMessage(String.format("Connected to Voice Channel: %s", vc.getName())).queue();
 			} 
 			catch (IllegalArgumentException e) {
 				message.getChannel().sendMessage("Invalid Voice Channel").queue();
 			}
 		} 
 		else {
-			throw new SyntaxErrorException("");
+			throw new SyntaxErrorException("Too many arguments");
 		}
 
 	}

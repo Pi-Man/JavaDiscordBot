@@ -2,6 +2,8 @@ package piman.events.commands;
 
 import java.util.Locale;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import piman.TestBot;
@@ -23,7 +25,7 @@ public class CommandHistory extends CommandBase {
 		String[] args = getArgs(message, input);
 		
 		if (args.length == 0) {
-			throw new SyntaxErrorException("Missing args");
+			throw new SyntaxErrorException("Missing arguments");
 		}
 		else if (args.length == 1) {
 			if (args[0].toLowerCase(Locale.ROOT).equals("view")) {
@@ -32,10 +34,11 @@ public class CommandHistory extends CommandBase {
 				builder.setTitle("History");
 				builder.addField("previous songs", text.isEmpty() ? "History is Empty" : text, false);
 				builder.setColor(TestBot.EMBED_COLOR_B);
-				message.getChannel().sendMessage(builder.build()).queue();
+				message.getChannel().sendMessageEmbeds(builder.build()).queue();
 			}
 			else if (args[0].toLowerCase(Locale.ROOT).equals("clear")) {
 				TestBot.getAudioEventHandler(message.getGuild().getId()).clearHistory();
+				message.getChannel().sendMessage("Cleared History").queue();
 			}
 			else if (args[0].toLowerCase(Locale.ROOT).equals("remove")) {
 				throw new SyntaxErrorException("Missing index");
@@ -48,7 +51,8 @@ public class CommandHistory extends CommandBase {
 			if (args[0].toLowerCase(Locale.ROOT).equals("remove")) {
 				try {
 					int i = Integer.valueOf(args[1]);
-					TestBot.getAudioEventHandler(message.getGuild().getId()).removeFromHistory(i);
+					AudioTrack track = TestBot.getAudioEventHandler(message.getGuild().getId()).removeFromHistory(i);
+					message.getChannel().sendMessage(String.format("Removed %s from History", track.getInfo().title)).queue();
 				}
 				catch (NumberFormatException e) {
 					throw new SyntaxErrorException("Invalid Integer: " + args[1]);
@@ -62,7 +66,7 @@ public class CommandHistory extends CommandBase {
 			}
 		}
 		else {
-			throw new SyntaxErrorException("Too many args");
+			throw new SyntaxErrorException("Too many arguments");
 		}
 		
 	}

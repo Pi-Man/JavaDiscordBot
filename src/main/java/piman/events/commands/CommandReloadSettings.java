@@ -26,10 +26,14 @@ public class CommandReloadSettings extends CommandBase {
 		if (args.length == 0) {
 			try {
 				TestBot.getConfig(message.getGuild().getId()).read();
+				message.getChannel().sendMessage("Reloaded Settings").queue();;
 			} catch (IOException e) {
 				message.getChannel().sendMessage("Unnable to Read Settings").queue();
 				e.printStackTrace();
 			}
+		}
+		else {
+			throw new SyntaxErrorException("Too many arguments");
 		}
 		
 	}

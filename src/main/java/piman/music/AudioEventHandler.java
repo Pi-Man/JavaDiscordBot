@@ -202,12 +202,12 @@ public class AudioEventHandler implements AudioEventListener {
 		return sb.toString();
 	}
 	
-	public void removeFromQueue(int index) {
-		queue.remove(index - 1);
+	public AudioTrack removeFromQueue(int index) {
+		return queue.remove(index - 1);
 	}
 	
-	public void removeFromHistory(int index) {
-		playedqueue.remove(index - 1);
+	public AudioTrack removeFromHistory(int index) {
+		return playedqueue.remove(index - 1);
 	}
 	
 	private void repeat() {

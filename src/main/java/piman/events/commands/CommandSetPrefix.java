@@ -23,11 +23,14 @@ public class CommandSetPrefix extends CommandBase {
 
 		String[] args = this.getArgs(message, input);
 
+		if (args.length == 0) {
+			throw new SyntaxErrorException("Missing arguments");
+		}
 		if (args.length == 1) {
 			this.setPrefix(message, args[0]);
 		} 
 		else {
-			throw new SyntaxErrorException("");
+			throw new SyntaxErrorException("Too many arguments");
 		}
 
 	}

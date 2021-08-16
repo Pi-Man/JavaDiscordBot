@@ -26,7 +26,10 @@ public class CommandPlay extends CommandBase {
 
 		String[] args = this.getArgs(message, input);
 		
-		if (args.length == 1) {
+		if (args.length == 0) {
+			throw new SyntaxErrorException("Missing Arguments");
+		}
+		else if (args.length == 1) {
 			AudioManager audioManager = message.getGuild().getAudioManager();
 			if (audioManager.getConnectionStatus() == ConnectionStatus.CONNECTED) {
 				AudioPlayer audioPlayer = TestBot.getAudioPlayer(message.getGuild().getId());
@@ -38,7 +41,7 @@ public class CommandPlay extends CommandBase {
 			}
 		}
 		else {
-			throw new SyntaxErrorException("");
+			throw new SyntaxErrorException("Too many arguments");
 		}
 		
 	}

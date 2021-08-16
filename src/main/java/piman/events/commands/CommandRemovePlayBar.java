@@ -23,6 +23,7 @@ public class CommandRemovePlayBar extends CommandBase {
 		if (args.length == 0) {
 		
 			TestBot.MUSIC_PLAYER.remove(message.getGuild().getId());
+			message.getChannel().sendMessage("Play bar removed").queue();;
 		
 		}
 		else {

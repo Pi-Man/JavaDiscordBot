@@ -57,7 +57,7 @@ public class TestBot {
 		bufferedReader.close();
 		
 		jda = JDABuilder.createDefault(token).setEventManager(new MainEventManager()).build();
-		
+				
 		jda.addEventListener(
 			textChannelMessageHandler,
 			MUSIC_PLAYER

@@ -239,10 +239,10 @@ public class MusicPlayerUpdater implements EventListener{
 				AudioTrack track = TestBot.getAudioPlayer(guildID).getPlayingTrack();
 				
 				MessageEmbed headerEmbed = getHeaderMessageEmbed(track, guildID);
-				Message headerMessage = getChannel(guildID).sendMessage(headerEmbed).complete();
+				Message headerMessage = getChannel(guildID).sendMessageEmbeds(headerEmbed).complete();
 				
 				MessageEmbed barEmbed = getBarMessageEmbed(track, guildID);
-				Message barMessage = getChannel(guildID).sendMessage(barEmbed).complete();
+				Message barMessage = getChannel(guildID).sendMessageEmbeds(barEmbed).complete();
 				
 				setHeaderMessage(headerMessage.getId(), guildID);
 				setBarMessage(barMessage.getId(), guildID); 
@@ -324,7 +324,7 @@ public class MusicPlayerUpdater implements EventListener{
 			List<String> capEvents = new ArrayList<>();
 			int length = 0;
 			for (Captions.Event event : captions.getEvents()) {
-				if (event.isInRange(track.getPosition(), 2000)) {
+				if (event.isInRange(track.getPosition(), 5000)) {
 					if (checkDuplicateCaptions(capEvents, event.getText())) {
 						length += event.getText().length();
 						if (length > MessageEmbed.VALUE_MAX_LENGTH) break;
@@ -413,15 +413,17 @@ public class MusicPlayerUpdater implements EventListener{
 			update(guildID);
 			
 			try {
+				long start = System.currentTimeMillis();
 				TimeUnit.SECONDS.sleep(2);
+				long end = System.currentTimeMillis();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			
 		}
 	}
-	private MessageEmbed oldHeaderEmbed;
-	private MessageEmbed oldBarEmbed;
+	private Map<String, MessageEmbed> oldHeaderEmbed = new HashMap<>();
+	private Map<String, MessageEmbed> oldBarEmbed = new HashMap<>();
 	private void update(String guildID) {
 		
 		AudioTrack track = TestBot.getAudioPlayer(guildID).getPlayingTrack();
@@ -439,13 +441,13 @@ public class MusicPlayerUpdater implements EventListener{
 		MessageEmbed headerEmbed = getHeaderMessageEmbed(track, guildID);
 		MessageEmbed barEmbed = getBarMessageEmbed(track, guildID);
 		
-		if (!barEmbed.equals(oldBarEmbed)) {
-			getChannel(guildID).editMessageById(getBarMessage(guildID), barEmbed).queue();
-			oldBarEmbed = barEmbed;
+		if (!barEmbed.equals(oldBarEmbed.get(guildID))) {
+			getChannel(guildID).editMessageEmbedsById(getBarMessage(guildID), barEmbed).queue();
+			oldBarEmbed.put(guildID, barEmbed);
 		}
-		if (!headerEmbed.equals(oldHeaderEmbed)) {
-			getChannel(guildID).editMessageById(getHeaderMessage(guildID), headerEmbed).queue();
-			oldHeaderEmbed = headerEmbed;
+		if (!headerEmbed.equals(oldHeaderEmbed.get(guildID))) {
+			getChannel(guildID).editMessageEmbedsById(getHeaderMessage(guildID), headerEmbed).queue();
+			oldHeaderEmbed.put(guildID, headerEmbed);
 		}
 		
 	}

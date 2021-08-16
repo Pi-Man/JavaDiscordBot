@@ -92,7 +92,10 @@ public class CommandPlaylist extends CommandPasswordBase {
 
 		String args[] = this.getArgs(message, input);
 		
-		if (args.length == 1) {
+		if (args.length == 0) {
+			throw new SyntaxErrorException("Missing arguments");
+		}
+		else if (args.length == 1) {
 			
 			switch (args[0]) {
 			case "load":
@@ -104,6 +107,9 @@ public class CommandPlaylist extends CommandPasswordBase {
 			case "save":
 				save(message);
 				return;
+			case "open":
+			case "add":
+				throw new SyntaxErrorException("Missing argument");
 			}
 			
 		}
@@ -117,8 +123,9 @@ public class CommandPlaylist extends CommandPasswordBase {
 				return;
 			}
 		}
-		
-		throw new SyntaxErrorException("");
+		else {
+			throw new SyntaxErrorException("Too many arguments");
+		}
 		
 	}
 	
@@ -149,7 +156,7 @@ public class CommandPlaylist extends CommandPasswordBase {
 		
 		AudioManager audioManager = message.getGuild().getAudioManager();
 		
-		if (audioManager.isConnected() || audioManager.isAttemptingToConnect()) {
+		if (audioManager.isConnected()) {
 		
 			List<AudioTrack> tracks = TestBot.MUSIC_PLAYER.getPlaylist(guildID).get();
 			
