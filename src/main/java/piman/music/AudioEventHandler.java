@@ -132,6 +132,9 @@ public class AudioEventHandler implements AudioEventListener {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		catch (Throwable t) {
+			t.printStackTrace();
+		}
 		track.setUserData(new YoutubeAudioTrackInfo(captions, thumbnail));
 		audioPlayer.startTrack(track, false);
 	}

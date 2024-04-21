@@ -59,6 +59,7 @@ public class AudioLoadResultHandler implements com.sedmelluq.discord.lavaplayer.
 		
 		if (exception.severity == Severity.COMMON) {
 			info = exception.getMessage();
+			exception.printStackTrace();
 		}
 		else {
 			info = "LavaPlayer would like to inform you that everything has EXPLODED: " + exception.getMessage();

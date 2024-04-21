@@ -23,6 +23,8 @@ repositories {
       name 'm2-dv8tion'
       url 'https://m2.dv8tion.net/releases'
     }
+    maven { url "https://maven.lavalink.dev/snapshots" }
+    maven { url "https://jitpack.io" }
 }
 
 sourceSets {
@@ -40,9 +42,12 @@ sourceSets {
 dependencies {
     // The production code uses the SLF4J logging API at compile time
     implementation 'org.slf4j:slf4j-log4j12:1.7.31'
-   	implementation 'com.sedmelluq:lavaplayer:1.3.+'
+    //implementation 'dev.arbjerg:lavaplayer:2.1.1'
+    implementation 'dev.arbjerg:lavaplayer:afec211f05c9dcf0b6ee44276a02f0316ea2458a-SNAPSHOT'
+    //implementation 'com.sedmelluq:lavaplayer-ext-youtube-rotator:0.2.3'
     implementation 'net.dv8tion:JDA:4.+'
     implementation 'org.apache.commons:commons-text:1.9'
+    implementation 'commons-io:commons-io:2.16.1'
     
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the

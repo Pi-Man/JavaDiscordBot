@@ -15,9 +15,11 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDA.Status;
 import net.dv8tion.jda.api.JDABuilder;
+
 import piman.config.BotConfig;
 import piman.events.MainEventManager;
 import piman.events.MusicPlayerUpdater;
@@ -41,6 +43,7 @@ public class TestBot {
 	private static TextChannelMessageEventHandler textChannelMessageHandler = new TextChannelMessageEventHandler();
 
 	public static void main(String[] args) throws IOException, LoginException {
+		
 		
 		File file = new File("resources/assets/auth/auth.txt");
 		

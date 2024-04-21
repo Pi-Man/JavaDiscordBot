@@ -5,3 +5,4 @@ build
 resources
 example.log
 example.log.1
+.metadata/
